@@ -1,9 +1,6 @@
 package com.marcusvmleite.grpc.client;
 
-import com.marcusvmleite.grpc.greet.GreetRequest;
-import com.marcusvmleite.grpc.greet.GreetResponse;
-import com.marcusvmleite.grpc.greet.GreetServiceGrpc;
-import com.marcusvmleite.grpc.greet.Greeting;
+import com.marcusvmleite.grpc.greet.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -22,14 +19,29 @@ public class GreetingClient {
                 .usePlaintext() //disabling TLS for dev. purposes only (DO NOT USE IN PROD!)
                 .build();
 
-        log.info("Sending request to gRPC server...");
+        GreetServiceGrpc.GreetServiceBlockingStub client = GreetServiceGrpc
+                .newBlockingStub(managedChannel);
 
-        GreetServiceGrpc.GreetServiceBlockingStub client = GreetServiceGrpc.newBlockingStub(managedChannel);
-        GreetResponse response = client.greet(createGreetRequest());
-
-        log.info("Got response: " + response.getResult());
+        //unaryRequest(client);
+        serverStreamRequest(client);
 
         managedChannel.shutdown();
+    }
+
+    private static void serverStreamRequest(GreetServiceGrpc.GreetServiceBlockingStub client) {
+        log.info("Sending request to gRPC stream server...");
+        GreetStreamRequest request = GreetStreamRequest.newBuilder()
+                .setGreeting(createGreet())
+                .build();
+        client.greetStream(request).forEachRemaining(result -> {
+            log.info("Received stream response: " + result.getResult());
+        });
+    }
+
+    private static void unaryRequest(GreetServiceGrpc.GreetServiceBlockingStub client) {
+        log.info("Sending request to gRPC server...");
+        GreetResponse response = client.greet(createGreetRequest());
+        log.info("Got response: " + response.getResult());
     }
 
     private static GreetRequest createGreetRequest() {
