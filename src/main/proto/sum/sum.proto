@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package sum;
+
+option java_package = "com.marcusvmleite.grpc.sum";
+option java_multiple_files = true;
+
+message Sum {
+    int32 first = 1;
+    int32 second = 2;
+}
+
+message SumRequest {
+    Sum sum = 1;
+}
+
+message SumResponse {
+    int32 result = 1;
+}
+
+service SumService {
+
+    rpc Sum(SumRequest) returns (SumResponse) {};
+
+}
