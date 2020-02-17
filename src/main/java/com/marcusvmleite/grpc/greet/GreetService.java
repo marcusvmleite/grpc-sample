@@ -1,6 +1,5 @@
-package com.marcusvmleite.grpc.server;
+package com.marcusvmleite.grpc.greet;
 
-import com.marcusvmleite.grpc.greet.*;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

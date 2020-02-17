@@ -1,9 +1,5 @@
-package com.marcusvmleite.grpc.server;
+package com.marcusvmleite.grpc.sum;
 
-import com.marcusvmleite.grpc.sum.Sum;
-import com.marcusvmleite.grpc.sum.SumRequest;
-import com.marcusvmleite.grpc.sum.SumResponse;
-import com.marcusvmleite.grpc.sum.SumServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

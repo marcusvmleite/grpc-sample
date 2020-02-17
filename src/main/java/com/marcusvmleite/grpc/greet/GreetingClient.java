@@ -1,6 +1,5 @@
-package com.marcusvmleite.grpc.client;
+package com.marcusvmleite.grpc.greet;
 
-import com.marcusvmleite.grpc.greet.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -85,7 +84,7 @@ public class GreetingClient {
                         .build())
                 .build());
 
-        //As on this example the server will send back a reponse only
+        //As on this example the server will send back a response only
         //when the client is done sending data, we need to tell the server
         //that the client is done.
         observer.onCompleted();

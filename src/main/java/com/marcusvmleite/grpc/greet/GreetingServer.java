@@ -1,4 +1,4 @@
-package com.marcusvmleite.grpc.server;
+package com.marcusvmleite.grpc.greet;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
