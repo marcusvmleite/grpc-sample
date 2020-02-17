@@ -5,6 +5,9 @@ import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class GreetService extends GreetServiceGrpc.GreetServiceImplBase {
@@ -54,6 +57,37 @@ public class GreetService extends GreetServiceGrpc.GreetServiceImplBase {
         });
 
         responseObserver.onCompleted();
+    }
+
+    public StreamObserver<LongGreetRequest> longGreet(StreamObserver<LongGreetResponse> responseObserver) {
+
+        return new StreamObserver<LongGreetRequest>() {
+
+            private List<String> incoming = new LinkedList<>();
+
+            @Override
+            public void onNext(LongGreetRequest longGreetRequest) {
+                //Client sends a message
+                log.info("Received Stream request from client: " + longGreetRequest.getGreeting().getFirstName());
+                incoming.add("Hello " + longGreetRequest.getGreeting().getFirstName());
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                //Client sends an error
+                log.error("An error occurred.", throwable);
+            }
+
+            @Override
+            public void onCompleted() {
+                //Client is done
+                //For this example we'll reply here
+                log.info("Got info from Stream Client that it has completed sending data!");
+                responseObserver.onNext(LongGreetResponse.newBuilder()
+                        .setResult(incoming.stream().collect(Collectors.joining(",")))
+                        .build());
+            }
+        };
     }
 
 }
