@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "com.marcusvmleite.grpc.max";
+option java_multiple_files = true;
+
+message MaxRequest {
+    int32 number = 1;
+}
+
+message MaxResponse {
+    int32 max = 1;
+}
+
+service MaxService {
+
+    rpc MaxFinder(stream MaxRequest) returns (stream MaxResponse) {};
+
+}
