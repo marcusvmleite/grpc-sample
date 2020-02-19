@@ -32,6 +32,7 @@ public class GreetService extends GreetServiceGrpc.GreetServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override
     public void greetStream(GreetStreamRequest request,
                             StreamObserver<GreetStreamResponse> responseObserver) {
 
@@ -58,6 +59,7 @@ public class GreetService extends GreetServiceGrpc.GreetServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override
     public StreamObserver<LongGreetRequest> longGreet(StreamObserver<LongGreetResponse> responseObserver) {
 
         return new StreamObserver<LongGreetRequest>() {
@@ -85,6 +87,33 @@ public class GreetService extends GreetServiceGrpc.GreetServiceImplBase {
                 responseObserver.onNext(LongGreetResponse.newBuilder()
                         .setResult(incoming.stream().collect(Collectors.joining(",")))
                         .build());
+            }
+        };
+    }
+
+    @Override
+    public StreamObserver<GreetEveryoneRequest> greetEveryone(StreamObserver<GreetEveryoneResponse> responseObserver) {
+
+        return new StreamObserver<GreetEveryoneRequest>() {
+            @Override
+            public void onNext(GreetEveryoneRequest greetEveryoneRequest) {
+                //As this is a Bi-Directional stream, on this example we
+                //reply to the client for each client's message
+                String greetMessage = "Hello " + greetEveryoneRequest.getGreeting().getFirstName();
+                GreetEveryoneResponse response = GreetEveryoneResponse.newBuilder()
+                        .setResult(greetMessage)
+                        .build();
+                responseObserver.onNext(response);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                log.error("An error occurred.", throwable);
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onCompleted();
             }
         };
     }

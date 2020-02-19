@@ -6,6 +6,7 @@ import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +23,7 @@ public class GreetingClient {
         unaryRequest(getSyncClient());
         serverStreamRequest(getSyncClient());
         clientStreamRequest(getAsyncClient());
+        biDirectionalStream(getAsyncClient());
 
         managedChannel.shutdown();
     }
@@ -56,6 +58,7 @@ public class GreetingClient {
             public void onError(Throwable throwable) {
                 //Server sends an error
                 log.error("An error occurred.", throwable);
+                latch.countDown();
             }
 
             @Override
@@ -66,23 +69,14 @@ public class GreetingClient {
             }
         });
 
-        observer.onNext(LongGreetRequest.newBuilder()
-                .setGreeting(Greeting.newBuilder()
-                        .setFirstName("Marcus")
-                        .build())
-                .build());
-
-        observer.onNext(LongGreetRequest.newBuilder()
-                .setGreeting(Greeting.newBuilder()
-                        .setFirstName("Dielle")
-                        .build())
-                .build());
-
-        observer.onNext(LongGreetRequest.newBuilder()
-                .setGreeting(Greeting.newBuilder()
-                        .setFirstName("Mayla")
-                        .build())
-                .build());
+        Arrays.asList("Marcus", "Dielle", "Mayla").forEach(name -> {
+            System.out.println("Sending Greet Request for: " + name);
+            observer.onNext(LongGreetRequest.newBuilder()
+                    .setGreeting(Greeting.newBuilder()
+                            .setFirstName(name)
+                            .build())
+                    .build());
+        });
 
         //As on this example the server will send back a response only
         //when the client is done sending data, we need to tell the server
@@ -106,6 +100,46 @@ public class GreetingClient {
         log.info("Sending request to gRPC server...");
         GreetResponse response = client.greet(createGreetRequest());
         log.info("Got response: " + response.getResult());
+    }
+
+    private static void biDirectionalStream(GreetServiceGrpc.GreetServiceStub asyncClient) throws InterruptedException {
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<GreetEveryoneRequest> observer = asyncClient.greetEveryone(new StreamObserver<GreetEveryoneResponse>() {
+            @Override
+            public void onNext(GreetEveryoneResponse greetEveryoneResponse) {
+                //Get response from server
+                log.info("Received from Server after Client Streaming: " + greetEveryoneResponse.getResult());
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                //Server sends an error
+                log.error("An error occurred.", throwable);
+                latch.countDown();
+            }
+
+            @Override
+            public void onCompleted() {
+                //Server finished sending data
+                log.info("Server finished sending data after Client Streaming.");
+                latch.countDown();
+            }
+        });
+
+        Arrays.asList("Marcus", "Dielle", "Mayla").forEach(name -> {
+            System.out.println("Sending Greet Request for: " + name);
+            observer.onNext(GreetEveryoneRequest.newBuilder()
+                    .setGreeting(Greeting.newBuilder()
+                            .setFirstName(name)
+                            .build())
+                    .build());
+        });
+
+        observer.onCompleted();
+
+        latch.await(5L, TimeUnit.SECONDS);
     }
 
     private static GreetRequest createGreetRequest() {
