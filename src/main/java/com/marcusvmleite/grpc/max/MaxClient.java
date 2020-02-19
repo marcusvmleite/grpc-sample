@@ -48,7 +48,7 @@ public class MaxClient {
             }
         });
 
-        List<Integer> input = Arrays.asList(1, 5, 2, 10, 3, 50, 1000, 900, 850, 1001);
+        List<Integer> input = Arrays.asList(1, 5, 2, 10, 3, 50, 1000, 900, 850, 1001, Integer.MIN_VALUE);
 
         input.stream().mapToInt(i -> i).forEach(i -> observer.onNext(MaxRequest.newBuilder()
                 .setNumber(i)

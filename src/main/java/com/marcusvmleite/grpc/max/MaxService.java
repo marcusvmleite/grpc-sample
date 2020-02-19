@@ -1,5 +1,6 @@
 package com.marcusvmleite.grpc.max;
 
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,7 +18,14 @@ public class MaxService extends MaxServiceGrpc.MaxServiceImplBase {
             @Override
             public void onNext(MaxRequest maxRequest) {
                 int input = maxRequest.getNumber();
-                if (input > max) {
+                if (input == Integer.MIN_VALUE) {
+                    responseObserver.onError(
+                            Status.INVALID_ARGUMENT
+                                .withDescription("Provided input is too small...")
+                                .augmentDescription("Provided input is: " + input)
+                                .asRuntimeException())
+                    ;
+                } else if (input > max) {
                     max = input;
                     responseObserver.onNext(MaxResponse.newBuilder()
                             .setMax(max)
