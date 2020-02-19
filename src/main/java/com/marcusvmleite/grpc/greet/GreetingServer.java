@@ -5,6 +5,7 @@ import io.grpc.ServerBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 
 public class GreetingServer {
@@ -18,6 +19,13 @@ public class GreetingServer {
         Server server = ServerBuilder.forPort(50051)
                 .addService(new GreetService())
                 .build();
+
+        Server securedServer = ServerBuilder.forPort(8443)
+                // Enable TLS
+                .useTransportSecurity(new File("server.crt"), new File("server.pem"))
+                .addService(new GreetService())
+                .build();
+
         server.start();
 
         log.info("gRPC up and running!");

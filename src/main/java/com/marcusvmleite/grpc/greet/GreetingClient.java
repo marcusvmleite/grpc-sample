@@ -2,10 +2,14 @@ package com.marcusvmleite.grpc.greet;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.net.ssl.SSLException;
+import java.io.File;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +41,13 @@ public class GreetingClient {
                     .forAddress("localhost", 50051)
                     .usePlaintext() //disabling TLS for dev. purposes only (DO NOT USE IN PROD!)
                     .build();
+    }
+
+    private static ManagedChannel getSSLManagedChannel() throws SSLException {
+        return NettyChannelBuilder.forAddress("localhost", 443)
+                .sslContext(GrpcSslContexts.forClient()
+                        .trustManager(new File("roots.pem")).build())
+                .build();
     }
 
     private static GreetServiceGrpc.GreetServiceStub getAsyncClient() {
