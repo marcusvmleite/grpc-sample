@@ -2,6 +2,7 @@ package com.marcusvmleite.grpc.greet;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.protobuf.services.ProtoReflectionService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,6 +19,7 @@ public class GreetingServer {
 
         Server server = ServerBuilder.forPort(50051)
                 .addService(new GreetService())
+                .addService(ProtoReflectionService.newInstance()) //Service Reflection
                 .build();
 
         Server securedServer = ServerBuilder.forPort(8443)
